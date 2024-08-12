@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery</title>
+    <style>
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .gallery div {
+            margin: 10px;
+            text-align: center;
+        }
+        .gallery img {
+            border: 1px solid #ccc;
+        }
+        .highlight img {
+            border: 3px solid red; /* Rote Umrandung für Thumbnails mit "Ding" im Namen */
+        }
+        .no-images {
+            margin-top: 20px;
+            font-size: 18px;
+            color: red;
+        }
+        .older-recordings {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Überwachungskamera</h1>
+    
+    <!-- Anzeige der Schaltfläche "Ältere Aufzeichnungen", wenn frühere Daten verfügbar sind -->
+    {% if available_dates %}
+        <div class="older-recordings">
+            <button onclick="toggleOlderDates()">Ältere Aufzeichnungen</button>
+            <div id="older-dates" style="display: none; margin-top: 10px;">
+                <ul>
+                    {% for date in available_dates %}
+                        <li>
+                            <a href="{{ url_for('index', date=date) }}">{{ date }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if folder_exists %}
+        <div class="gallery">
+            {% for image in images %}
+            <div class="{% if image.highlight %}highlight{% endif %}">
+                <a href="{{ url_for('image', filename=image.filename, date=selected_date) }}">
+                    <img src="{{ url_for('thumbnail', filename=image.filename, date=selected_date) }}" alt="{{ image.filename }}">
+                </a>
+                <p>{{ image.datetime.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="no-images">Heute wurden noch keine Bilder aufgezeichnet.</p>
+    {% endif %}
+
+    <script>
+        function toggleOlderDates() {
+            var x = document.getElementById("older-dates");
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
