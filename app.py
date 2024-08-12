@@ -116,14 +116,6 @@ def upload_image(filename):
     
     delete_old_folders()  # Überprüfen und löschen alter Ordner bei jedem Upload
 
-    # Prüfen, ob die Datei im Request vorhanden ist
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
-
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
-
     # Erstellen des Ordners für das aktuelle Datum, falls er nicht existiert
     image_folder = get_image_folder()
     if not os.path.exists(image_folder):
@@ -135,7 +127,14 @@ def upload_image(filename):
     secure_filename = f"{os.path.splitext(filename)[0]}_{timestamp}{file_extension}"
     filepath = os.path.join(image_folder, secure_filename)
 
-    file.save(filepath)
+    if request.content_type.startswith('multipart/form-data'):
+        if 'file' not in request.files:
+            return jsonify({"error": "No file part"}), 400        
+        file = request.files['file']
+        file.save(filepath)
+    else:
+        with open(filepath, 'wb') as f:
+            f.write(request.stream.read())        
 
     return jsonify({"message": "File uploaded successfully", "filename": secure_filename}), 200
 
