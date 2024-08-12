@@ -127,7 +127,7 @@ def upload_image(filename):
     secure_filename = f"{os.path.splitext(filename)[0]}_{timestamp}{file_extension}"
     filepath = os.path.join(image_folder, secure_filename)
 
-    if request.content_type.startswith('multipart/form-data'):
+    if request.content_type is not None and request.content_type.startswith('multipart/form-data'):
         if 'file' not in request.files:
             return jsonify({"error": "No file part"}), 400        
         file = request.files['file']
